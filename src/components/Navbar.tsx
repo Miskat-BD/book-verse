@@ -2,15 +2,38 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
+import { authClient } from '@/lib/auth-client';
+import toast from 'react-hot-toast';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
-  // 📝 এই ভ্যারিয়েবলটি True করলে Logged In মোড এবং False করলে Logged Out মোড দেখতে পারবে।
-  const isLoggedIn = false; 
+  // Better-Auth এর রিয়েল সেশন হুক
+  const { data: session, isPending } = authClient.useSession();
+  
+  // সেশনে ইউজার অবজেক্ট থাকলে সে লগড-ইন
+  const isLoggedIn = !!session?.user;
+
+  // Logout ফাংশনালিটি
+  const handleLogout = async () => {
+    try {
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success('Logged out successfully');
+            router.push('/');
+            router.refresh();
+          },
+        },
+      });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to logout');
+    }
+  };
 
   const publicLinks = [
     { label: 'Home', href: '/' },
@@ -24,14 +47,19 @@ export default function Navbar() {
     { label: 'Manage Books', href: '/books/manage' },
   ];
 
-  // Logged out থাকলে ৪টি রাউট, Logged in থাকলে ৪ + ২ = ৬টি রাউট দেখাবে
+  // সেশনের ওপর বেস করে ডাইনামিক রাউটস
   const currentNavLinks = isLoggedIn ? [...publicLinks, ...privateLinks] : publicLinks;
+
+  // সেশন চেক করার সময় UI যাতে লাফ না দেয়, তাই ইনিশিয়াল লোডিং হ্যান্ডেল
+  if (isPending) {
+    return <div className="h-16 w-full fixed bg-white border-b border-slate-200 animate-pulse top-0 left-0 z-50" />;
+  }
 
   return (
     <nav className="w-full border-b border-slate-200 fixed top-0 left-0 z-50 shadow-sm backdrop-blur-md bg-white/90">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          
+
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-1 select-none">
             <span className="text-2xl font-extrabold tracking-tight text-slate-900">
@@ -45,11 +73,10 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-semibold tracking-wide transition-colors duration-200 ${
-                  pathname === link.href
-                    ? 'text-indigo-600'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
+                className={`text-sm font-semibold tracking-wide transition-colors duration-200 ${pathname === link.href
+                  ? 'text-indigo-600'
+                  : 'text-slate-600 hover:text-slate-900'
+                  }`}
               >
                 {link.label}
               </Link>
@@ -58,12 +85,17 @@ export default function Navbar() {
             {/* Authentication UI Trigger */}
             <div className="flex items-center space-x-4 border-l border-slate-200 pl-6 ml-2">
               {isLoggedIn ? (
-                <button
-                  onClick={() => alert('Logging out...')}
-                  className="text-sm font-bold text-red-600 hover:text-red-700 transition-colors"
-                >
-                  Logout
-                </button>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-medium text-slate-700">
+                    Hi, {session.user.name.split(' ')[0]} {/* শুধু প্রথম নাম দেখাবে */}
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="text-sm font-bold text-red-600 hover:text-red-700 transition-colors cursor-pointer"
+                  >
+                    Logout
+                  </button>
+                </div>
               ) : (
                 <>
                   <Link href="/login" className="text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors">
@@ -112,27 +144,31 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className={`block px-4 py-2.5 rounded-xl text-base font-semibold ${
-                  pathname === link.href
-                    ? 'bg-indigo-50 text-indigo-600'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
+                className={`block px-4 py-2.5 rounded-xl text-base font-semibold ${pathname === link.href
+                  ? 'bg-indigo-50 text-indigo-600'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  }`}
               >
                 {link.label}
               </Link>
             ))}
-            
+
             <div className="pt-4 border-t border-slate-200 mt-4 px-4 flex flex-col space-y-3">
               {isLoggedIn ? (
-                <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    alert('Logging out...');
-                  }}
-                  className="w-full text-center font-bold text-red-600 py-2.5 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
-                >
-                  Logout
-                </button>
+                <>
+                  <div className="text-sm font-medium text-slate-500 text-center">
+                    Signed in as: <span className="font-semibold text-slate-800">{session.user.email}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-center font-bold text-red-600 py-2.5 bg-red-50 hover:bg-red-100 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Logout
+                  </button>
+                </>
               ) : (
                 <>
                   <Link
