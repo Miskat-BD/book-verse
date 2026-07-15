@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Button, Card, FieldError, Form, Input, Label, TextField } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { authClient } from "@/lib/auth-client";
+// ফিক্সড পাথ: Next.js Alias ব্যবহার করে সরাসরি মেইন lib ফোল্ডার লিংক করা হয়েছে
+import { authClient } from "@/app/lib/auth-client";
 
 const RegisterFormPage = ({ redirectTo = "/" }) => {
     const [loading, setLoading] = useState(false);
@@ -110,12 +111,12 @@ const RegisterFormPage = ({ redirectTo = "/" }) => {
                     </TextField>
 
                     {/* Submit Register Button */}
-                    <Button 
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 mt-2 rounded-xl transition-all active:scale-98" 
+                    <Button
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 mt-2 rounded-xl transition-all active:scale-98 disabled:opacity-70 disabled:cursor-not-allowed"
                         type="submit"
-                        isLoading={loading}
+                        isDisabled={loading} // 👈 disabled-কে isDisabled বানিয়ে দাও
                     >
-                        {loading ? "Creating Account..." : "Sign Up"}
+                        {loading ? "Logging in..." : "Log In"}
                     </Button>
                 </Form>
 
@@ -124,7 +125,7 @@ const RegisterFormPage = ({ redirectTo = "/" }) => {
                     <p className="text-center text-sm text-slate-600">
                         Already have an account?{" "}
                         <span className="text-indigo-600 font-semibold hover:underline">
-                            <Link href="/auth/login">Log In</Link>
+                            <Link href="/login">Log In</Link>
                         </span>
                     </p>
 
@@ -137,8 +138,8 @@ const RegisterFormPage = ({ redirectTo = "/" }) => {
                         </div>
                     </div>
 
-                    <button 
-                        onClick={handleGoogle} 
+                    <button
+                        onClick={handleGoogle}
                         className="flex items-center justify-center gap-2 w-full py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl transition-all text-sm font-semibold shadow-sm"
                     >
                         <svg aria-label="Google logo" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">

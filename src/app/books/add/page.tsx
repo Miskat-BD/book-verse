@@ -4,15 +4,19 @@ import React, { useState } from "react";
 import { Button, Card, FieldError, Form, Input, Label, TextField } from "@heroui/react";
 import toast from "react-hot-toast";
 import { addBooks, BookInputData } from "@/app/lib/actions/books";
+import { authClient } from "@/app/lib/auth-client";
 
 const AddBooksForm = () => {
     const [loading, setLoading] = useState(false);
+    const { data: session, isPending } = authClient.useSession();
+    const user = session?.user
+    //  console.log(user, 'user');
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formElement = e.currentTarget;
         const formData = new FormData(formElement);
-        
+
         // ফর্মের সব ডেটা অবজেক্টে নেওয়া
         const rawData = Object.fromEntries(formData.entries());
 
@@ -20,6 +24,7 @@ const AddBooksForm = () => {
         const bookData: BookInputData = {
             title: rawData.title as string,
             author: rawData.author as string,
+            userId: user?.id as string,
             image: rawData.image as string,
             price: Number(rawData.price), // স্ট্রিং থেকে নাম্বার কনভার্ট
             category: rawData.category as string,
@@ -36,7 +41,7 @@ const AddBooksForm = () => {
             // ২. সাকসেসফুল রেসপন্স পাওয়ার পর কেবল টোস্ট এবং রিসেট হবে
             toast.success("Book Added Successfully!");
             formElement.reset();
-            
+
         } catch (err: any) {
             console.error("Error adding book:", err);
             toast.error(err.message || "Failed to add book");
@@ -56,7 +61,7 @@ const AddBooksForm = () => {
             {/* Container Card */}
             <Card className="max-w-2xl mx-auto p-6 sm:p-8 border border-slate-100 bg-white shadow-md">
                 <Form onSubmit={onSubmit} className="flex w-full flex-col gap-5 justify-center mx-auto">
-                    
+
                     {/* Grid Layout for Title & Author */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
                         {/* Book Title */}
@@ -127,10 +132,10 @@ const AddBooksForm = () => {
                     </div>
 
                     {/* Submit Button */}
-                    <Button 
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 mt-4 rounded-xl transition-all active:scale-98 cursor-pointer" 
+                    <Button
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-sm"
                         type="submit"
-                        isLoading={loading}
+                        isDisabled={loading} // disabled এর বদলেisDisabled ব্যবহার করো
                     >
                         {loading ? "Adding Book..." : "Add Book to Library"}
                     </Button>

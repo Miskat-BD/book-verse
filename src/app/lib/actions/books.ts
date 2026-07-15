@@ -4,6 +4,7 @@ import { serverMutation } from "../core/server";
 export interface BookInputData {
     title: string;
     author: string;
+    userId: string;
     image: string;
     price: number;
     category: string;
