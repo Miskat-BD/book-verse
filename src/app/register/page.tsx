@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Button, Card, FieldError, Form, Input, Label, TextField } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
 import toast from "react-hot-toast";
+import { authClient } from "@/lib/auth-client";
 
 const RegisterFormPage = ({ redirectTo = "/" }) => {
     const [loading, setLoading] = useState(false);

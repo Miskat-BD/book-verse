@@ -67,12 +67,6 @@ export default function Hero() {
           >
             Explore All Books
           </Link>
-          <Link
-            href="/register"
-            className="w-full sm:w-auto px-8 py-3.5 text-sm font-bold text-slate-200 bg-white/5 hover:bg-white/10 border border-slate-700 hover:border-slate-500 rounded-xl transition-all text-center backdrop-blur-sm active:scale-98"
-          >
-            Create Free Account
-          </Link>
         </motion.div>
 
       </div>

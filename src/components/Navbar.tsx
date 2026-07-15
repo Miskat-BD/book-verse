@@ -4,8 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { authClient } from '@/lib/auth-client';
 import toast from 'react-hot-toast';
+import { authClient } from '@/app/lib/auth-client';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
