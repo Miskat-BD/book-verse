@@ -19,3 +19,13 @@ export const addBooks = async (data: BookInputData): Promise<unknown> => {
         data as unknown as Record<string, unknown>
     );
 };
+
+export const getBookByUserId = async (userId: string): Promise<any> => {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    const res = await fetch(`${baseUrl}/api/books/user/${userId}`, {
+        cache: 'no-store'
+    });
+    
+    if (!res.ok) throw new Error("Failed to load books");
+    return res.json();
+};
